@@ -1,0 +1,66 @@
+
+abstract public class AbstractFetcher<M extends AbstractMetric> {
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractFetcher.class);
+    protected static SSLContext sslContext = null;
+
+    protected static final TrustManager[] trustAllCerts = new TrustManager[]{
+            new X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+                public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                }
+                public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                }
+            }
+    };
+
+    static {
+        try {
+            sslContext = SSLContext.getInstance("SSL");
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("SSLContext.getInstance", e);
+        }
+        try {
+            sslContext.init(null, trustAllCerts, new SecureRandom());
+        } catch (KeyManagementException e) {
+            logger.error("sslContext.init", e);
+        }
+        final Properties props = System.getProperties();
+        props.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
+    }
+
+    protected final HttpClient client = HttpClient.newBuilder().sslContext(sslContext).build();
+    protected final HttpRequest.Builder builder = HttpRequest.newBuilder();
+    protected final ObjectMapper objectMapper = new ObjectMapper();
+    protected final String endpoint;
+
+    private final Class<M> mappedMetric;
+
+    public AbstractFetcher(String endpoint, Class<M> metricClass) {
+        this.endpoint = endpoint;
+        this.mappedMetric = metricClass;
+    }
+
+    public Optional<M> getMetric(String id) {
+        // https://stackoverflow.com/questions/21245796/javax-net-ssl-sslhandshakeexception-remote-host-closed-connection-during-handsh
+        System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
+
+        var request = builder
+                .uri(URI.create(endpoint + "/" + id))
+                .header("User-Agent", "kd-graph-comparer")
+                .header("Accept", "application/json")
+                .build();
+        var response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .join();
+
+        Optional<M> r = Optional.empty();
+        try {
+            r = Optional.of(objectMapper.readValue(response, mappedMetric));
+        } catch (IOException e) {
+            logger.error(String.format("Error processing %s, %s", id,e.toString()));
+        }
+
+        return r;
+    }
