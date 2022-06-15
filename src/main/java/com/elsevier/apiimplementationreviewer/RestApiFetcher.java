@@ -12,6 +12,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Optional;
 
+// responsible for fetching data from api
 public class RestApiFetcher {
 
     private HttpClient client;

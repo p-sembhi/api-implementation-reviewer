@@ -6,6 +6,7 @@ import org.neo4j.util.concurrent.Work;
 
 import java.util.Map;
 
+//this class is responsible for running queries and returning the result set fo documents
 public class Document {
     private Neo4jClient neo4j;
 
