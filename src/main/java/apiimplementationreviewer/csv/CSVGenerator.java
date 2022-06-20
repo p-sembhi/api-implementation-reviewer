@@ -1,36 +1,25 @@
 package apiimplementationreviewer.csv;
 
-import com.elsevier.apiimplementationreviewer.metrics.AuthorMetric;
+import com.elsevier.apiimplementationreviewer.metrics.Metric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+// parent class for author and document generator (shares functionality)
 public class CSVGenerator {
+
     private static final Logger logger = LoggerFactory.getLogger(CSVGenerator.class);
-    private OutputStream output;
+    protected OutputStream output; // can be accessed safely from the class itself or subclasses
 
+    public void appendMetric(Metric metric)  {
 
-    public CSVGenerator(BufferedOutputStream output) throws IOException {
-//        new File(directoryName).mkdir();
-        this.output = output;
-        this.output.write("ID |, Query_HIndex, Query_CoAuthor, Query_CitedBy\n".getBytes(StandardCharsets.UTF_8));
-    }
-
-
-    public void appendAuthor(AuthorMetric authorMetric)  {
         try{
-            output.write(String.format(
-                    "%s, %d, %d, %d\n",
-                    authorMetric.id,
-                    authorMetric.hindex,
-                    authorMetric.totalCoAuthors,
-                    authorMetric.totalCitedBy).getBytes(StandardCharsets.UTF_8));
+            output.write(metric.toCSVString().getBytes(StandardCharsets.UTF_8));
         } catch (IOException ex){
             logger.error("Failed to append author ", ex);
         }
-
     }
-
 }
