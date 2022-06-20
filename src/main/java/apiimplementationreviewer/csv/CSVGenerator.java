@@ -12,7 +12,8 @@ import java.nio.charset.StandardCharsets;
 public class CSVGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(CSVGenerator.class);
-    protected OutputStream output; // can be accessed safely from the class itself or subclasses
+    protected OutputStream output; // protected access modifier can be accessed safely from the class itself or
+    // subclasses
 
     public void appendMetric(Metric metric)  {
 

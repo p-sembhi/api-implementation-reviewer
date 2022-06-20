@@ -49,8 +49,8 @@ public class MetricReviewer {
 
 //create two authormetric classes (one with all of the metrics and the other one with the (JSON) metrics ) ->DONE
 //look at generating a csv file to show the citation count for rest and cypher ->DONE
+//Look into formatting CSV file (more readable) -> DONE?
 //Pull in result from rest API endpoints (author / document)
-//Look into formatting CSV file (more readable) -> DONE
 //look at pulling in id's from graph (consider number of id's and how random they are (number of nodes and coauthors))
 //Start adding GraphQL queries?
 

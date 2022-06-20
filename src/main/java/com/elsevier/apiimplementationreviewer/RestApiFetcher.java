@@ -2,6 +2,8 @@ package com.elsevier.apiimplementationreviewer;
 
 
 import com.elsevier.apiimplementationreviewer.metrics.AuthorMetric;
+import com.elsevier.apiimplementationreviewer.metrics.DocumentMetric;
+import com.elsevier.apiimplementationreviewer.metrics.Metric;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -12,7 +14,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Optional;
 
-// responsible for fetching data from api
+// This class is responsible for fetching data from api
+
 public class RestApiFetcher {
 
     private HttpClient client;
@@ -25,7 +28,7 @@ public class RestApiFetcher {
         this.endPoint = endPoint;
     }
 
-    public AuthorMetric getMetrics(String id) throws IOException, InterruptedException {
+    public AuthorMetric getMetricA(String id) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(endPoint + "/" + id)).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString()); //because we are using ofString we need <string>
 
@@ -36,6 +39,20 @@ public class RestApiFetcher {
 //            logger.error(String.format("Error processing %s, %s", id,e.toString()));
         }
         return r;
+    }
+
+
+    public DocumentMetric getMetricD(String id) throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(endPoint + "/" + id)).build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        DocumentMetric rs = null;
+        try {
+            rs = Optional.of(objectMapper.readValue(response.body(), DocumentMetric.class)).get();
+        } catch (IOException e) {
+//            logger.error(String.format("Error processing %s, %s", id,e.toString()));
+        }
+        return rs;
     }
 
 }
