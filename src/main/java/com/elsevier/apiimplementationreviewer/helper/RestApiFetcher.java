@@ -1,9 +1,9 @@
-package com.elsevier.apiimplementationreviewer;
+package com.elsevier.apiimplementationreviewer.helper;
 
 
 import com.elsevier.apiimplementationreviewer.csv.CSVGenerator;
-import com.elsevier.apiimplementationreviewer.metrics.AuthorMetric;
 import com.elsevier.apiimplementationreviewer.metrics.DocumentMetric;
+import com.elsevier.apiimplementationreviewer.metrics.AuthorMetric;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
