@@ -1,4 +1,4 @@
-package com.elsevier.apiimplementationreviewer.helper.csv;
+package com.elsevier.apiimplementationreviewer.csv;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
