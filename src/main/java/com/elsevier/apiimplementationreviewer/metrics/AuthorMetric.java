@@ -1,4 +1,4 @@
-package com.elsevier.apiimplementationreviewer.helper.metrics;
+package com.elsevier.apiimplementationreviewer.metrics;
 
 import java.util.ArrayList;
 
