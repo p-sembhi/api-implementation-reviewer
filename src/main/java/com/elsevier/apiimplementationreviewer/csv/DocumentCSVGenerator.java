@@ -1,4 +1,4 @@
-package apiimplementationreviewer.csv;
+package com.elsevier.apiimplementationreviewer.helper.csv;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -9,6 +9,6 @@ public class DocumentCSVGenerator extends CSVGenerator{
 
     public DocumentCSVGenerator(BufferedOutputStream output) throws IOException {
         this.output = output;
-        this.output.write("DocumentID, Citation_Count \n".getBytes(StandardCharsets.UTF_8));
+        this.output.write("DocumentID, Citation_Count, Implementation \n".getBytes(StandardCharsets.UTF_8));
     }
 }

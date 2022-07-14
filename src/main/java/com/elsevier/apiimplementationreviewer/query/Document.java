@@ -1,14 +1,14 @@
-package com.elsevier.apiimplementationreviewer.query;
+package com.elsevier.apiimplementationreviewer.helper.query;
 
-import com.elsevier.apiimplementationreviewer.Neo4jClient;
-import com.elsevier.apiimplementationreviewer.metrics.DocumentMetric;
+import com.elsevier.apiimplementationreviewer.helper.Neo4jClient;
+import com.elsevier.apiimplementationreviewer.helper.metrics.DocumentMetric;
 import org.neo4j.driver.Record;
 
 import java.util.Map;
 
 //this class is responsible for running queries and returning the result set fo documents
 public class Document implements QueryMetric {
-    private Neo4jClient neo4j;
+    private final Neo4jClient neo4j;
 
     public Document (Neo4jClient neo4j) {this.neo4j = neo4j;}
     public DocumentMetric getMetric(String id){

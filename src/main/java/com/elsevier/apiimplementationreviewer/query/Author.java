@@ -1,14 +1,14 @@
-package com.elsevier.apiimplementationreviewer.query;
+package com.elsevier.apiimplementationreviewer.helper.query;
 
-import com.elsevier.apiimplementationreviewer.Neo4jClient;
-import com.elsevier.apiimplementationreviewer.metrics.AuthorMetric;
+import com.elsevier.apiimplementationreviewer.helper.Neo4jClient;
+import com.elsevier.apiimplementationreviewer.helper.metrics.AuthorMetric;
 import org.neo4j.driver.Record;
 
 import java.util.Map;
-
+//used by neo4j
 public class Author implements QueryMetric {
 
-    private Neo4jClient neo4j;
+    private final Neo4jClient neo4j;
     //this class is responsible for running queries and returning the result set
 
     public Author(Neo4jClient neo4j) {

@@ -1,8 +1,8 @@
-package com.elsevier.apiimplementationreviewer.metrics;
+package com.elsevier.apiimplementationreviewer.helper.metrics;
 
 import java.util.ArrayList;
 
-
+//used by both neo4j and restapi
 // contains the author metric objects used by MetricReviewer (for now)
 public class AuthorMetric implements Metric{
     public String id;
@@ -13,13 +13,14 @@ public class AuthorMetric implements Metric{
     public ArrayList<String> coAuthorIds = new ArrayList<>();
     public int hindex;
 
+public AuthorMetric(){}
 
     public AuthorMetric(String id, int hindex, int totalCitedBy, int totalCoAuthors){
         this.id = id;
         this.hindex = hindex;
         this.totalCitedBy = totalCitedBy;
         this.totalCoAuthors = totalCoAuthors;
-        this.totalCitations = totalCitations;
+        this.totalCitations = totalCitations; // add in later
         this.totalPapers = totalPapers;
         this.coAuthorIds = coAuthorIds;
     }
@@ -27,7 +28,7 @@ public class AuthorMetric implements Metric{
 
     public String toCSVString(){
        return String.format(
-                "%s, %d, %d, %d\n",
+                "%s, %d, %d, %d",
                 id,
                 totalCitedBy,
                 hindex,
