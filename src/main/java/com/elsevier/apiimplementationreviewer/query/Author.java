@@ -1,7 +1,7 @@
-package com.elsevier.apiimplementationreviewer.helper.query;
+package com.elsevier.apiimplementationreviewer.query;
 
 import com.elsevier.apiimplementationreviewer.helper.Neo4jClient;
-import com.elsevier.apiimplementationreviewer.helper.metrics.AuthorMetric;
+import com.elsevier.apiimplementationreviewer.metrics.AuthorMetric;
 import org.neo4j.driver.Record;
 
 import java.util.Map;
