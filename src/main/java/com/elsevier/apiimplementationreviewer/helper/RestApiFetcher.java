@@ -32,9 +32,9 @@ public class RestApiFetcher extends CSVGenerator {
 
     public AuthorMetric getAuthorMetric(String id) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(endPoint + "/authors/" + id)).build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString()); //because we are using ofString we need <string>
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        AuthorMetric rAuthor = null; //set to null which is causing null pointer exception?
+        AuthorMetric rAuthor = null;
         try {
             rAuthor = Optional.of(objectMapper.readValue(response.body(), AuthorMetric.class)).get();
             rAuthor.id = id;
@@ -51,19 +51,15 @@ public class RestApiFetcher extends CSVGenerator {
 
         DocumentMetric rDoc = null;
         try {
-            rDoc = Optional.of(objectMapper.readValue(response.body(), DocumentMetric.class)).get();
-            rDoc.id = id;
-        } catch (IOException e) {
+            String test = response.body();
+            rDoc = objectMapper.readValue(response.body(), DocumentMetric.class);
+            if (rDoc != null){
+                rDoc.id = id;
+            }
+
+        } catch (Exception e) {
             logger.error(String.format("Error processing %s, %s", id, e));
         }
         return rDoc;
     }
 }
-
-// try to get this to return author and doc metrics then and display on csv file.
-//Create two seperate methods (one for author and one for documents)
-// use append metric method?
-// look at how i would interact with GraphQL endpoint (ask sarina how to use insomnia profile to access graphql)
-// endpoint no longer works? look into why this is. Might have to use insomnia endpoint but would mean adding token
-//  solution -New db that nancy created was not added to puppet repo so was pointing to old db which is why endpoint
-//  stopped working.  

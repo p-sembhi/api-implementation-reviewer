@@ -19,6 +19,7 @@ public class CSVGenerator {
         try {
             output.write(String.format("%s, %s\n",neo4jMetric.toCSVString(),"neo4j").getBytes(StandardCharsets.UTF_8));
             output.write(String.format("%s, %s\n",restMetric.toCSVString(),"rest").getBytes(StandardCharsets.UTF_8));
+
         } catch (IOException ex) {
             logger.error("Failed to append author ", ex);
         }
