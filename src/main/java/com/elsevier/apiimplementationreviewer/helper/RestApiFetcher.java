@@ -1,9 +1,9 @@
 package com.elsevier.apiimplementationreviewer.helper;
 
-
 import com.elsevier.apiimplementationreviewer.csv.CSVGenerator;
 import com.elsevier.apiimplementationreviewer.metrics.DocumentMetric;
 import com.elsevier.apiimplementationreviewer.metrics.AuthorMetric;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +13,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Optional;
+
 
 // This class is responsible for fetching data from api
-
 public class RestApiFetcher extends CSVGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(RestApiFetcher.class);
@@ -30,36 +29,36 @@ public class RestApiFetcher extends CSVGenerator {
         this.endPoint = endPoint;
     }
 
-    public AuthorMetric getAuthorMetric(String id) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(endPoint + "/authors/" + id)).build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        AuthorMetric rAuthor = null;
-        try {
-            rAuthor = Optional.of(objectMapper.readValue(response.body(), AuthorMetric.class)).get();
-            rAuthor.id = id;
-        } catch (IOException e) {
-            logger.error(String.format("Error processing %s, %s", id, e));
+    public AuthorMetric getAuthorMetric(String id) throws IOException, InterruptedException {
+        AuthorMetric metric = getMetric(URI.create(endPoint + "/authors/" + id), AuthorMetric.class);
+        if (metric != null) {
+            metric.id = id;
         }
 
-        return rAuthor;
+        return metric;
     }
 
     public DocumentMetric getDocumentMetric(String id) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(endPoint + "/documents/" + id)).build();
+        DocumentMetric metric = getMetric(URI.create(endPoint + "/documents/" + id), DocumentMetric.class);
+        if (metric != null) {
+            metric.id = id;
+        }
+
+        return metric;
+    }
+
+    private <T> T getMetric(URI uri, Class<T> valueType) throws IOException, InterruptedException {
+        T metric = null;
+        HttpRequest request = HttpRequest.newBuilder().uri(uri).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        DocumentMetric rDoc = null;
-        try {
-            String test = response.body();
-            rDoc = objectMapper.readValue(response.body(), DocumentMetric.class);
-            if (rDoc != null){
-                rDoc.id = id;
-            }
-
-        } catch (Exception e) {
-            logger.error(String.format("Error processing %s, %s", id, e));
+        if(response.statusCode() == 200) {
+            metric = objectMapper.readValue(response.body(), valueType);
+        }else {
+            logger.warn(String.format("Got status code: %d for uri: %s", response.statusCode(), uri));
         }
-        return rDoc;
+
+        return metric;
     }
 }

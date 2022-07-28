@@ -4,6 +4,7 @@ import com.elsevier.apiimplementationreviewer.csv.AuthorCSVGenerator;
 import com.elsevier.apiimplementationreviewer.csv.DocumentCSVGenerator;
 import com.elsevier.apiimplementationreviewer.helper.Neo4jClient;
 import com.elsevier.apiimplementationreviewer.helper.RestApiFetcher;
+import com.elsevier.apiimplementationreviewer.metrics.Metric;
 import com.elsevier.apiimplementationreviewer.query.Author;
 import com.elsevier.apiimplementationreviewer.query.Document;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.http.HttpClient;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -23,7 +25,7 @@ public class MetricReviewer {
 
     private static final Logger log = LoggerFactory.getLogger(MetricReviewer.class);
     private static final String appProperties = "src/main/resources/application.properties";
-
+    private static final String reportsDirectory = "reports";
 
     public static final Option type = Option.builder("type")
             .argName("type")
@@ -36,13 +38,9 @@ public class MetricReviewer {
 
 
     public static void main(String... args) throws Exception {
+        log.info(String.format("Running with args: %s", Arrays.toString(args)));
 
         CommandLineParser parser = new DefaultParser();
-
-//        logger.error("Hello World" ); fix this later on look into slf4j error message
-        log.debug("Hello");
-        log.info("info logger");
-//use slf4j for logging if log4j still doesn't work
 
         try { //look into try catch with parameters vs resources
             InputStream input = new FileInputStream(appProperties);
@@ -58,63 +56,70 @@ public class MetricReviewer {
             Neo4jClient neo4jClient = new Neo4jClient(dbUri, dbUsername, dbPassword, true, dbName);
             ObjectMapper objectMapper = new ObjectMapper();
             HttpClient httpClient = HttpClient.newBuilder().build();
-            RestApiFetcher restApiFetcher =
-                    new RestApiFetcher(objectMapper, httpClient, restEndpoint); //restapifetcher object
+            RestApiFetcher restApiFetcher = new RestApiFetcher(objectMapper, httpClient, restEndpoint); //restapifetcher object
+
+
 
             // parse the command line arguments
             CommandLine line = parser.parse(options, args);
 
             if (line.hasOption(type)) {
 
+                File directory = new File(reportsDirectory);
+                if (!directory.exists()){
+                    log.debug("Creating reports directory.");
+                    directory.mkdir();
+                } else {
+                    log.debug("Reports directory already exists.");
+                }
+
                 List<String> ids = line.getArgList();
-                //look at bufferedoutputstream memory for portfolio
 
                 switch (line.getOptionValue(type)) {
                     case "author":
                         Author author = new Author(neo4jClient);
-                        BufferedOutputStream output = new BufferedOutputStream(
-                                new FileOutputStream(
-                                        String.format("%s/%s-%s", "reports", "author", System.currentTimeMillis()) +
-                                                ".csv"));
-                        AuthorCSVGenerator csv = new AuthorCSVGenerator(output); //creating a new object
+                        String authPath = String.format("%s/%s-%s.csv", reportsDirectory, "author", System.currentTimeMillis());
+                        BufferedOutputStream authOutput = new BufferedOutputStream(new FileOutputStream(authPath));
+                        AuthorCSVGenerator authCsv = new AuthorCSVGenerator(authOutput);
                         for (String id : ids) {
-                            csv.appendMetrics(author.getMetric(id), restApiFetcher.getAuthorMetric(id));
+                            Metric authMetric = restApiFetcher.getAuthorMetric(id);
+                            if (authMetric != null){
+                                authCsv.appendMetrics(author.getMetric(id), authMetric);
+                            } else {
+                                log.warn(String.format("This id: %s does not exist", id));
+                            }
                         }
-                        output.flush();
 
+                        authOutput.flush();
+                        log.info(String.format("Created file: %s", authPath));
                         break;
 
                     case "document":
                         Document document = new Document(neo4jClient);
-                        BufferedOutputStream docOutput = new BufferedOutputStream(
-                                new FileOutputStream(
-                                        String.format("%s/%s-%s", "reports", "document",
-                                                System.currentTimeMillis()) +
-                                                ".csv"));
+                        String docPath = String.format("%s/%s-%s.csv", reportsDirectory, "document", System.currentTimeMillis());
+                        BufferedOutputStream docOutput = new BufferedOutputStream(new FileOutputStream(docPath));
                         DocumentCSVGenerator docCsv = new DocumentCSVGenerator(docOutput);
                         for (String id : ids) {
-                            docCsv.appendMetrics(document.getMetric(id),
-                                    restApiFetcher.getDocumentMetric(id));
+                            Metric docMetric = restApiFetcher.getDocumentMetric(id);
+                            if (docMetric != null){
+                                docCsv.appendMetrics(document.getMetric(id), docMetric);
+                            } else {
+                                log.warn(String.format("This id: %s does not exist", id));
+                            }
                         }
                         docOutput.flush();
-
+                        log.info(String.format("Created file: %s", docPath));
                         break;
 
-
                     default:
-                        System.err.format("%s, invalid type, can be [author,document]", type.getArgName());
+                        log.error(String.format("Invalid type, %s, can only be [author,document]", line.getOptionValue(type)));
                 }
 
             } else {
-                System.err.format("type is required");
+                log.error("A type is required");
             }
-
-
-        } catch (
-                FileNotFoundException exp) {
-            // oops, something went wrong
-            log.error("Parsing failed.  Reason: " + exp.getMessage());
-
+        } catch (Exception exp) {
+            log.error("Failed to run, reason: " + exp);
         }
     }
 }

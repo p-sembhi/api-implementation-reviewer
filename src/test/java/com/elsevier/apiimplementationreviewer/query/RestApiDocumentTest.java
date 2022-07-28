@@ -29,21 +29,20 @@ public class RestApiDocumentTest {
 
     RestApiFetcher fetcher;
 
-   @Mock
-   HttpClient client;
+    @Mock
+    HttpClient client;
 
-   @BeforeEach
+    @BeforeEach
     void setup() {
-       fetcher = new RestApiFetcher(new ObjectMapper(), client, ENDPOINT);
-   }
+        fetcher = new RestApiFetcher(new ObjectMapper(), client, ENDPOINT);
+    }
 
     @Test
     void getDocumentMetrics () throws IOException, InterruptedException {
         HttpResponse<Object> response = mock(HttpResponse.class);
         when(client.send(any(), any())).thenReturn(response);
-        //try out 404 status code test here
-        when(response.body()).thenReturn(
-                "{\"citedByIds\":[\"85121047907\"],\"totalCitedBy\":10}");
+        when(response.statusCode()).thenReturn(200);
+        when(response.body()).thenReturn("{\"citedByIds\":[\"85121047907\"],\"totalCitedBy\":10}");
 
         DocumentMetric metric = fetcher.getDocumentMetric(DOCUMENT_ID);
 
@@ -51,9 +50,17 @@ public class RestApiDocumentTest {
         assertEquals(10, metric.getTotalCitedBy());
         assertEquals(List.of("85121047907"), metric.getCitedByIds());
         assertEquals(DOCUMENT_ID, metric.getId());
+        assertEquals(DOCUMENT_ID+", 10, [85121047907]", metric.toCSVString());
+    }
+
+    @Test
+    void canHandleNotFoundId() throws IOException, InterruptedException {
+        HttpResponse<Object> response = mock(HttpResponse.class);
+        when(client.send(any(), any())).thenReturn(response);
+        when(response.statusCode()).thenReturn(404);
+
+        DocumentMetric metric = fetcher.getDocumentMetric(DOCUMENT_ID);
+
+        assertNull(metric);
     }
 }
-
-//test for 400 error. mock(HttpResponseStatusCode) if we get a 400 error we expect to see a id in teh csv with no
-// metrics.
-
