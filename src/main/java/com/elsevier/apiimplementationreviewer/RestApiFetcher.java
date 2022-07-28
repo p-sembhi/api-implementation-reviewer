@@ -12,6 +12,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Optional;
 
+// responsible for fetching data from api
 public class RestApiFetcher {
 
     private HttpClient client;
@@ -38,3 +39,8 @@ public class RestApiFetcher {
     }
 
 }
+
+// try to get this to return author and doc metrics then and display on csv file.
+//Create two seperate methods (one for author and one for documents)
+// use append metric method?
+// look at how i would interact with GraphQL endpoint (ask sarina how to use insomnia profile to access graphql)

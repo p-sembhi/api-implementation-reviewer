@@ -7,6 +7,7 @@ import org.neo4j.exceptions.Neo4jException;
 import java.util.*;
 import java.util.function.UnaryOperator;
 
+//responsible for setting up connection to neo4j
 public class Neo4jClient implements AutoCloseable {
 
 //    private static final Logger logger = LoggerFactory.getLogger(Neo4jClient.class);
