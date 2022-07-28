@@ -1,4 +1,4 @@
-package com.elsevier.apiimplementationreviewer;
+package com.elsevier.apiimplementationreviewer.helper;
 
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
@@ -15,9 +15,6 @@ public class Neo4jClient implements AutoCloseable {
     private final String neo4jUrl;
     private final String database;
 
-
-
-
     public Neo4jClient(String url, String user, String password, boolean encryption, String database ) {
 //        logger.info("url = " + url + " user = " + user + " database = " + );
         neo4jUrl = url;
@@ -33,7 +30,6 @@ public class Neo4jClient implements AutoCloseable {
 
     }
 
-
     public List<Record> executeQuery(final String query, Map<String, Object> parameters) throws Neo4jException {
             return getSession(AccessMode.READ).run(query,parameters).list();
         }
@@ -42,12 +38,10 @@ public class Neo4jClient implements AutoCloseable {
         return getSession(AccessMode.READ).run(query,parameters).single();
     }
 
-
     @Override
     public void close() {
         driver.close();
     }
-
 
     public Session getSession(AccessMode accessMode) {
         UnaryOperator<SessionConfig.Builder> dbBuilder = (this.database == null || "".equals(this.database) ?
@@ -57,5 +51,4 @@ public class Neo4jClient implements AutoCloseable {
 
         return this.driver.session(builder);
     }
-
 }
