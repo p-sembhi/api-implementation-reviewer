@@ -4,6 +4,9 @@ import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
 import org.neo4j.exceptions.Neo4jException;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.function.UnaryOperator;
 
@@ -15,8 +18,15 @@ public class Neo4jClient implements AutoCloseable {
     private final String neo4jUrl;
     private final String database;
 
-    public Neo4jClient(String url, String user, String password, boolean encryption, String database ) {
-//        logger.info("url = " + url + " user = " + user + " database = " + );
+
+    public Neo4jClient(Driver driver, String neo4jUrl, String database) {
+        this.driver = driver;
+        this.neo4jUrl = neo4jUrl;
+        this.database = database;
+    }
+
+    public Neo4jClient(String url, String user, String password, boolean encryption, String database ){
+        //        logger.info("url = " + url + " user = " + user + " database = " + );
         neo4jUrl = url;
         AuthToken authToken = AuthTokens.basic(user, password);
 
@@ -28,7 +38,9 @@ public class Neo4jClient implements AutoCloseable {
         driver = GraphDatabase.driver(neo4jUrl, authToken, config);
         this.database = database;
 
+
     }
+
 
     public List<Record> executeQuery(final String query, Map<String, Object> parameters) throws Neo4jException {
             return getSession(AccessMode.READ).run(query,parameters).list();

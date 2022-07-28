@@ -3,6 +3,7 @@ package com.elsevier.apiimplementationreviewer.query;
 import com.elsevier.apiimplementationreviewer.helper.Neo4jClient;
 import com.elsevier.apiimplementationreviewer.metrics.AuthorMetric;
 import org.neo4j.driver.Record;
+import org.neo4j.driver.exceptions.NoSuchRecordException;
 
 import java.util.Map;
 //used by neo4j
@@ -25,23 +26,29 @@ public class Author implements QueryMetric {
     }
 
     private int totalCitedBy(String id) {
-        Record count = this.neo4j.executeSingleQuery("MATCH (:Person { ID:$ID})-[:authorOf]->()<-[:references]-(citingDoc)  RETURN COUNT(DISTINCT citingDoc) AS result;", Map.of("ID", id));
-        return count.get("result").asInt();
+        try {
+            Record count = this.neo4j.executeSingleQuery("MATCH (:Person { ID:$ID})-[:authorOf]->()<-[:references]-(citingDoc)  RETURN COUNT(DISTINCT citingDoc) AS result;", Map.of("ID", id));
+            return count.get("result").asInt();
+        } catch (NoSuchRecordException exception) {
+            return 0;
+        }
     }
 
     private int totalCoAuthorCount(String id) {
-        Record count = this.neo4j.executeSingleQuery("MATCH (:Person {ID:$ID})-[:authorOf]->()<-[:authorOf]-(co) RETURN COUNT(DISTINCT co) AS result;", Map.of("ID", id));
-        return count.get("result").asInt();
-    }
-//
-//    public void hIndex (Neo4jClient neo4j){this.neo4j = neo4j;}
-    private int totalHIndexCount(String id)
-    {
-        Record count = this.neo4j.executeSingleQuery("MATCH (:Person { ID:$ID})-[:authorOf]->(work) WITH work,SIZE((work)<-[:references]-()) AS citations ORDER BY citations RETURN org.elsevier.hIndex(COLLECT(citations)) AS result;", Map.of("ID", id));
-        return count.get("result").asInt();
+        try {
+            Record count = this.neo4j.executeSingleQuery("MATCH (:Person {ID:$ID})-[:authorOf]->()<-[:authorOf]-(co) RETURN COUNT(DISTINCT co) AS result;", Map.of("ID", id));
+            return count.get("result").asInt();
+        } catch (NoSuchRecordException exception) {
+            return 0;
+        }
     }
 
+    private int totalHIndexCount(String id){
+        try {
+            Record count = this.neo4j.executeSingleQuery("MATCH (:Person { ID:$ID})-[:authorOf]->(work) WITH work,SIZE((work)<-[:references]-()) AS citations ORDER BY citations RETURN org.elsevier.hIndex(COLLECT(citations)) AS result;", Map.of("ID", id));
+            return count.get("result").asInt();
+        } catch (NoSuchRecordException exception) {
+            return 0;
+        }
+    }
 }
-
-
-// QUESTION why do we need orderBy for hindex?

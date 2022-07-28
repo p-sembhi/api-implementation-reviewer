@@ -12,4 +12,5 @@ public class AuthorCSVGenerator extends CSVGenerator{
     }
 }
 
-//look at why two author csv files are being generated.
+//look at why two author csv files are being generated. 2 are being generated because of the parameters set in metric
+// reviewer config. Figure out a way to have metrics from multiple ids in one CSV file

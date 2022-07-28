@@ -34,4 +34,20 @@ public AuthorMetric(){}
                 hindex,
                 totalCoAuthors);
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public int getTotalCitedBy() {
+        return totalCitedBy;
+    }
+
+    public int getTotalCoAuthors() {
+        return totalCoAuthors;
+    }
+
+    public int getHindex() {
+        return hindex;
+    }
 }
